@@ -8,7 +8,12 @@ use App\Models\User;
 class UserController extends Controller
 {
     public function index() {
-        $users = User::latest()->paginate(2);
+        $users = User::query()
+        ->when(request('query'), function($query, $searchQuery){
+            $query->where('name', 'like', "%{$searchQuery}%");
+        })
+        ->latest()
+        ->paginate(2);
         return $users;
     }
 
@@ -22,7 +27,8 @@ class UserController extends Controller
         $users = User::create([
             'name' => request('name'),
             'email' => request('email'),
-            'password' => bcrypt(request('password'))
+            'password' => bcrypt(request('password')),
+            'role' => 2
         ]);
 
         return $users;
@@ -57,15 +63,6 @@ class UserController extends Controller
         ]);
 
         return response()->json(['success' => true]);
-    }
-
-    public function search() {
-
-        $searchQuery = request('query');
-
-        $users = User::where('name', 'like', "%{$searchQuery}%")->paginate(2);
-
-        return response()->json($users);
     }
 
     public function bulkDelete() {
