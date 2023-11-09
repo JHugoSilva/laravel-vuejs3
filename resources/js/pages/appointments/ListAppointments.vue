@@ -45,7 +45,6 @@ const deleteAppointment = (id) => {
     if (result.isConfirmed) {
         axios.delete(`/api/appointments/${id}`)
         .then((response) => {
-            console.log(response)
             appointments.value.data = appointments.value.data.filter(appointment => appointment.id !== id)
             Swal.fire("Deleted!", "Your file has been deleted.", "success");
         })

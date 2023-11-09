@@ -13,14 +13,19 @@ const formValues = ref();
 const users = ref({ data: [] });
 const editing = ref(false);
 const form = ref(null);
+const selectAll = ref(false);
+const searhQuery = ref(null);
+const userIdBeingDeleted = ref(null);
+const selectedUsers = ref([]);
 
 const getUsers = (page = 1) => {
-  axios.get(`/api/users?page=${page}`,{ params: { query: searhQuery.value }})
-  .then((response) => {
-    users.value = response.data;
-    selectedUsers.value = [];
-    selectAll.value = false;
-  });
+  axios
+    .get(`/api/users?page=${page}`, { params: { query: searhQuery.value } })
+    .then((response) => {
+      users.value = response.data;
+      selectedUsers.value = [];
+      selectAll.value = false;
+    });
 };
 
 const createUserSchema = yup.object({
@@ -93,9 +98,6 @@ const handleSubmit = (values, actions) => {
   }
 };
 
-
-const userIdBeingDeleted = ref(null);
-
 const confirmUserDeletion = (id) => {
   userIdBeingDeleted.value = id;
   $("#deleteUserModal").modal("show");
@@ -104,12 +106,12 @@ const confirmUserDeletion = (id) => {
 const deleteUser = () => {
   axios.delete(`/api/users/${userIdBeingDeleted.value}`).then(() => {
     $("#deleteUserModal").modal("hide");
-    users.value.data = users.value.data.filter(user => user.id !== userIdBeingDeleted.value);
+    users.value.data = users.value.data.filter(
+      (user) => user.id !== userIdBeingDeleted.value
+    );
     toastr.success("User deleted successfully");
   });
 };
-
-const searhQuery = ref(null);
 
 const resetFormulario = () => {
   formValues.value = {
@@ -119,8 +121,6 @@ const resetFormulario = () => {
   };
 };
 
-const selectedUsers = ref([]);
-
 const toggleSelection = (user) => {
   const index = selectedUsers.value.indexOf(user.id);
   if (index === -1) {
@@ -128,7 +128,6 @@ const toggleSelection = (user) => {
   } else {
     selectedUsers.value.splice(index, 1);
   }
-  console.log(selectedUsers.value);
 };
 
 const bulkDelete = () => {
@@ -142,21 +141,18 @@ const bulkDelete = () => {
   });
 };
 
-const selectAll = ref(false);
-
 const selectedAllUsers = () => {
   if (selectAll.value) {
     selectedUsers.value = users.value.data.map((user) => user.id);
   } else {
     selectedUsers.value = [];
   }
-  console.log(selectedUsers.value);
 };
 
 watch(
   searhQuery,
   debounce(() => {
-    getUsers()
+    getUsers();
   }, 300)
 );
 

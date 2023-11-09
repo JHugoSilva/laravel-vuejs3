@@ -13,7 +13,7 @@ class UserController extends Controller
             $query->where('name', 'like', "%{$searchQuery}%");
         })
         ->latest()
-        ->paginate(2);
+        ->paginate(setting('pagination_limit'));
         return $users;
     }
 

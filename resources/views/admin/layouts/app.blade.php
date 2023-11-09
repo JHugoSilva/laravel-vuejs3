@@ -3,16 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AdminLTE 3 | Dashboard 2</title>
+  <title>{{ setting('app_name') }} | Dashboard 2</title>
 
-  <!-- Google Font: Source Sans Pro -->
-  <link rel="stylesheet" href="">
-  <!-- Font Awesome Icons -->
-  <link rel="stylesheet" href="{{ asset('') }}">
   @vite(['resources/css/app.css', 'resources/js/app.js'])
   <!-- Theme style -->
 </head>
-<body class="hold-transition dark-mode sidebar-mini layout-fixed layout-navbar-fixed layout-footer-fixed">
+<body class="hold-transition dark-mode sidebar-mini sidebar-collapse">
     <body class="hold-transition sidebar-mini">
         <div class="wrapper" id="app">
           <!-- Navbar -->
@@ -33,7 +29,7 @@
             <!-- Right navbar links -->
             <ul class="navbar-nav ml-auto">
               <!-- Navbar Search -->
-              <li class="nav-item">
+              <li class="nav-item" id="toggleMenuIcon">
                 <a class="nav-link" data-widget="navbar-search" href="#" role="button">
                   <i class="fas fa-search"></i>
                 </a>
@@ -169,7 +165,7 @@
                   <img src="https://adminlte.io/themes/v3/dist/img/user2-160x160.jpg" class="img-circle elevation-2" alt="User Image">
                 </div>
                 <div class="info">
-                  <a href="#" class="d-block">Alexander Pierce</a>
+                  <a href="#" class="d-block">{{ auth()->user()->name }}</a>
                 </div>
               </div>
               <!-- Sidebar Menu -->
@@ -227,7 +223,7 @@
 
           <!-- Main Footer -->
           <footer class="main-footer">
-            <strong>Copyright &copy; 2014-2021 <a href="https://adminlte.io">AdminLTE.io</a>.</strong>
+            <strong>Copyright &copy; {{ date('Y') }} <a href="#">{{ setting('app_name') }}</a>.</strong>
             All rights reserved.
             <div class="float-right d-none d-sm-inline-block">
               <b>Version</b> 3.2.0
@@ -235,7 +231,25 @@
           </footer>
         </div>
         <!-- ./wrapper -->
+        <script>
+            document.addEventListener('DOMContentLoaded', ()=>{
+                const toggleMenuIcon = document.getElementById('toggleMenuIcon')
+                const body = document.querySelector('body')
 
+                toggleMenuIcon.addEventListener('click', () => {
+                    if (body.classList.contains('sidebar-collapse')) {
+                        localStorage.setItem('sidebarState', 'expanded')
+                    } else {
+                        localStorage.setItem('sidebarState', 'collapse')
+                    }
+                })
+
+                const sidebarState = localStorage.getItem('sidebarState')
+                if (sidebarState === 'collapsed') {
+                    body.classList.add('sidebar-collapse')
+                }
+            })
+        </script>
 
         </body>
 
