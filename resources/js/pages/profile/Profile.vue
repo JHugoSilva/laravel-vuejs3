@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, reactive } from "vue";
 import { useToastr } from "@/toastr";
 
 const form = ref({
@@ -13,13 +13,39 @@ const errors = ref([]);
 const profilePictureUrl = ref(null)
 const fileInput = ref(null)
 
+const changePasswordForm = reactive({
+  currentPassword: '',
+  password: '',
+  passwordConfirmation: ''
+})
+
+const handleChangePassword = () => {
+  errors.value = ''
+  axios.post('/api/change-user-password', changePasswordForm)
+  .then((response) => {
+    toastr.success(response.data.message)
+    for (const field in changePasswordForm) {
+            changePasswordForm[field] = ''
+      }
+  })
+   .catch((error) => {
+      if (error.response && error.response.status === 422) {
+          errors.value = error.response.data.errors
+      }
+    });
+}
+
 const getUser = () => {
   axios
     .get("/api/profile")
     .then((response) => {
       form.value = response.data;
     })
-    .catch((err) => {});
+    .catch((error) => {
+      if (error.response && error.response.status === 422) {
+          errors.value = error.response.data.errors
+      }
+    });
 };
 
 const openFileInput = () => {
@@ -36,7 +62,6 @@ const handleFileChange = (event) => {
     .then((response) => {
         toastr.success('Image uploaded successfully')
     })
-    console.log(profilePictureUrl.value)
 }
 
 const updateProfile = () => {
@@ -82,7 +107,7 @@ onMounted(() => {
                 <img
                   @click="openFileInput"
                   class="profile-user-img img-circle"
-                  :src="profilePictureUrl ? profilePictureUrl : '/noimage.jpg'"
+                  :src="profilePictureUrl ? profilePictureUrl : form.avatar"
                   alt="User profile picture"
                 />
               </div>
@@ -161,18 +186,24 @@ onMounted(() => {
                 </div>
 
                 <div class="tab-pane" id="changePassword">
-                  <form class="form-horizontal">
+                  <form @submit.prevent="handleChangePassword" class="form-horizontal">
                     <div class="form-group row">
                       <label for="currentPassword" class="col-sm-3 col-form-label"
                         >Current Password</label
                       >
                       <div class="col-sm-9">
                         <input
+                          v-model="changePasswordForm.currentPassword"
                           type="password"
                           class="form-control"
                           id="currentPassword"
                           placeholder="Current Password"
                         />
+                         <span
+                        class="text-danger text-sm"
+                        v-if="errors && errors.current_password"
+                        >{{ errors.current_password[0] }}</span
+                      >
                       </div>
                     </div>
                     <div class="form-group row">
@@ -181,11 +212,17 @@ onMounted(() => {
                       >
                       <div class="col-sm-9">
                         <input
+                          v-model="changePasswordForm.password"
                           type="password"
                           class="form-control"
                           id="newPassword"
                           placeholder="New Password"
                         />
+                         <span
+                        class="text-danger text-sm"
+                        v-if="errors && errors.password"
+                        >{{ errors.password[0] }}</span
+                      >
                       </div>
                     </div>
                     <div class="form-group row">
@@ -194,6 +231,7 @@ onMounted(() => {
                       >
                       <div class="col-sm-9">
                         <input
+                          v-model="changePasswordForm.passwordConfirmation"
                           type="password"
                           class="form-control"
                           id="passwordConfirmation"
